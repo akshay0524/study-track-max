@@ -6,6 +6,8 @@ import TaskCard from '../components/TaskCard';
 import { PlusCircle, Calendar, BarChart2, Clock } from 'lucide-react';
 import { motion } from 'framer-motion';
 import { useInView } from 'react-intersection-observer';
+import { Link } from 'react-router-dom';
+import { toast } from "sonner";
 
 const Index = () => {
   const [tasks, setTasks] = useState<Task[]>([
@@ -42,6 +44,22 @@ const Index = () => {
     setTasks(tasks.map(task => 
       task.id === id ? { ...task, completed: !task.completed } : task
     ));
+  };
+
+  const addNewTask = () => {
+    const newTask: Task = {
+      id: (tasks.length + 1).toString(),
+      title: 'New Task',
+      description: 'Click to edit',
+      date: new Date(),
+      completed: false,
+      category: 'study',
+      duration: 30,
+      priority: 'medium',
+      tags: ['New'],
+    };
+    setTasks([...tasks, newTask]);
+    toast.success("New task added!");
   };
 
   const container = {
@@ -84,30 +102,38 @@ const Index = () => {
           initial="hidden"
           animate="show"
         >
-          <motion.div 
-            variants={item}
-            whileHover={{ scale: 1.02, translateZ: 20 }}
-            className="glass-card p-4 text-center"
-          >
-            <Calendar className="w-8 h-8 mx-auto mb-2 text-accent" />
-            <h3 className="font-medium">Monthly View</h3>
-          </motion.div>
-          <motion.div 
-            variants={item}
-            whileHover={{ scale: 1.02, translateZ: 20 }}
-            className="glass-card p-4 text-center"
-          >
-            <BarChart2 className="w-8 h-8 mx-auto mb-2 text-accent" />
-            <h3 className="font-medium">Study Analytics</h3>
-          </motion.div>
-          <motion.div 
-            variants={item}
-            whileHover={{ scale: 1.02, translateZ: 20 }}
-            className="glass-card p-4 text-center"
-          >
-            <Clock className="w-8 h-8 mx-auto mb-2 text-accent" />
-            <h3 className="font-medium">Time Tracking</h3>
-          </motion.div>
+          <Link to="/monthly-view">
+            <motion.div 
+              variants={item}
+              whileHover={{ scale: 1.02, translateZ: 20 }}
+              className="glass-card p-4 text-center cursor-pointer"
+            >
+              <Calendar className="w-8 h-8 mx-auto mb-2 text-accent" />
+              <h3 className="font-medium">Monthly View</h3>
+            </motion.div>
+          </Link>
+          
+          <Link to="/study-analytics">
+            <motion.div 
+              variants={item}
+              whileHover={{ scale: 1.02, translateZ: 20 }}
+              className="glass-card p-4 text-center cursor-pointer"
+            >
+              <BarChart2 className="w-8 h-8 mx-auto mb-2 text-accent" />
+              <h3 className="font-medium">Study Analytics</h3>
+            </motion.div>
+          </Link>
+          
+          <Link to="/time-tracking">
+            <motion.div 
+              variants={item}
+              whileHover={{ scale: 1.02, translateZ: 20 }}
+              className="glass-card p-4 text-center cursor-pointer"
+            >
+              <Clock className="w-8 h-8 mx-auto mb-2 text-accent" />
+              <h3 className="font-medium">Time Tracking</h3>
+            </motion.div>
+          </Link>
         </motion.div>
 
         <motion.div 
@@ -124,6 +150,7 @@ const Index = () => {
             <motion.button 
               whileHover={{ scale: 1.05 }}
               whileTap={{ scale: 0.95 }}
+              onClick={addNewTask}
               className="nav-item flex items-center gap-2 bg-accent/10 hover:bg-accent/20"
             >
               <PlusCircle size={20} />
