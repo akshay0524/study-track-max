@@ -13,7 +13,7 @@
 
 @layer components {
   .glass-card {
-    @apply bg-background-glass backdrop-blur-xl border border-accent-light rounded-xl shadow-lg;
+    @apply glass-morphism rounded-xl shadow-lg;
   }
   
   .task-item {
