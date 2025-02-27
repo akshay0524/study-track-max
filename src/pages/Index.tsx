@@ -3,7 +3,7 @@ import React, { useState } from 'react';
 import { format } from 'date-fns';
 import { Task } from '../types/Task';
 import TaskCard from '../components/TaskCard';
-import { PlusCircle } from 'lucide-react';
+import { PlusCircle, Calendar, BarChart2, Clock } from 'lucide-react';
 import { motion } from 'framer-motion';
 import { useInView } from 'react-intersection-observer';
 
@@ -17,6 +17,8 @@ const Index = () => {
       completed: false,
       category: 'study',
       duration: 60,
+      priority: 'high',
+      tags: ['Math', 'Homework'],
     },
     {
       id: '2',
@@ -26,6 +28,8 @@ const Index = () => {
       completed: false,
       category: 'study',
       duration: 45,
+      priority: 'medium',
+      tags: ['Physics', 'Reading'],
     },
   ]);
 
@@ -56,7 +60,7 @@ const Index = () => {
   };
 
   return (
-    <div className="min-h-screen p-6 bg-gradient-to-b from-background to-background/95">
+    <div className="min-h-screen p-6 bg-gradient-to-b from-background to-background/95 perspective-container">
       <motion.header 
         ref={headerRef}
         initial={{ opacity: 0, y: -20 }}
@@ -73,7 +77,39 @@ const Index = () => {
         <p className="text-gray-400">{format(new Date(), 'EEEE, MMMM d')}</p>
       </motion.header>
 
-      <main className="max-w-md mx-auto">
+      <main className="max-w-3xl mx-auto">
+        <motion.div 
+          className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6"
+          variants={container}
+          initial="hidden"
+          animate="show"
+        >
+          <motion.div 
+            variants={item}
+            whileHover={{ scale: 1.02, translateZ: 20 }}
+            className="glass-card p-4 text-center"
+          >
+            <Calendar className="w-8 h-8 mx-auto mb-2 text-accent" />
+            <h3 className="font-medium">Monthly View</h3>
+          </motion.div>
+          <motion.div 
+            variants={item}
+            whileHover={{ scale: 1.02, translateZ: 20 }}
+            className="glass-card p-4 text-center"
+          >
+            <BarChart2 className="w-8 h-8 mx-auto mb-2 text-accent" />
+            <h3 className="font-medium">Study Analytics</h3>
+          </motion.div>
+          <motion.div 
+            variants={item}
+            whileHover={{ scale: 1.02, translateZ: 20 }}
+            className="glass-card p-4 text-center"
+          >
+            <Clock className="w-8 h-8 mx-auto mb-2 text-accent" />
+            <h3 className="font-medium">Time Tracking</h3>
+          </motion.div>
+        </motion.div>
+
         <motion.div 
           variants={container}
           initial="hidden"
