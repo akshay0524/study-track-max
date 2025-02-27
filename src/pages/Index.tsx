@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { format } from 'date-fns';
 import { Task } from '../types/Task';
@@ -60,6 +59,16 @@ const Index = () => {
     };
     setTasks([...tasks, newTask]);
     toast.success("New task added!");
+  };
+
+  const handleEditTask = (id: string, updatedTask: Partial<Task>) => {
+    setTasks(tasks.map(task =>
+      task.id === id ? { ...task, ...updatedTask } : task
+    ));
+  };
+
+  const handleDeleteTask = (id: string) => {
+    setTasks(tasks.filter(task => task.id !== id));
   };
 
   const container = {
@@ -161,7 +170,12 @@ const Index = () => {
           <motion.div className="space-y-4" variants={container}>
             {tasks.map(task => (
               <motion.div key={task.id} variants={item}>
-                <TaskCard task={task} onToggle={toggleTask} />
+                <TaskCard
+                  task={task}
+                  onToggle={toggleTask}
+                  onEdit={handleEditTask}
+                  onDelete={handleDeleteTask}
+                />
               </motion.div>
             ))}
           </motion.div>

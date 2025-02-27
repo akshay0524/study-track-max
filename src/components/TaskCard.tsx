@@ -1,20 +1,41 @@
 
-import React from 'react';
+import React, { useState } from 'react';
 import { format } from 'date-fns';
 import { Task } from '../types/Task';
-import { Check, Clock, AlertTriangle } from 'lucide-react';
+import { Check, Clock, AlertTriangle, Edit2, Trash2, X } from 'lucide-react';
 import { motion } from 'framer-motion';
+import { toast } from 'sonner';
 
 interface TaskCardProps {
   task: Task;
   onToggle: (id: string) => void;
+  onEdit: (id: string, updatedTask: Partial<Task>) => void;
+  onDelete: (id: string) => void;
 }
 
-const TaskCard: React.FC<TaskCardProps> = ({ task, onToggle }) => {
+const TaskCard: React.FC<TaskCardProps> = ({ task, onToggle, onEdit, onDelete }) => {
+  const [isEditing, setIsEditing] = useState(false);
+  const [editedTitle, setEditedTitle] = useState(task.title);
+  const [editedDescription, setEditedDescription] = useState(task.description || '');
+
   const priorityColors = {
     high: 'text-red-400',
     medium: 'text-yellow-400',
     low: 'text-green-400',
+  };
+
+  const handleSave = () => {
+    onEdit(task.id, {
+      title: editedTitle,
+      description: editedDescription,
+    });
+    setIsEditing(false);
+    toast.success('Task updated successfully!');
+  };
+
+  const handleDelete = () => {
+    onDelete(task.id);
+    toast.success('Task deleted successfully!');
   };
 
   return (
@@ -35,7 +56,7 @@ const TaskCard: React.FC<TaskCardProps> = ({ task, onToggle }) => {
       }}
     >
       <div className="flex items-center justify-between p-4">
-        <div className="flex items-center gap-3">
+        <div className="flex items-center gap-3 flex-1">
           <motion.button
             whileHover={{ scale: 1.1 }}
             whileTap={{ scale: 0.9 }}
@@ -56,34 +77,89 @@ const TaskCard: React.FC<TaskCardProps> = ({ task, onToggle }) => {
               </motion.div>
             )}
           </motion.button>
-          <div>
-            <div className="flex items-center gap-2">
-              <h3 className={`font-semibold transition-all duration-300 ${
-                task.completed ? 'line-through text-gray-400' : ''
-              }`}>
-                {task.title}
-              </h3>
-              {task.priority && (
-                <span className={`text-xs ${priorityColors[task.priority]}`}>
-                  {task.priority.toUpperCase()}
-                </span>
+          
+          {isEditing ? (
+            <div className="flex-1">
+              <input
+                type="text"
+                value={editedTitle}
+                onChange={(e) => setEditedTitle(e.target.value)}
+                className="w-full bg-background/50 rounded px-2 py-1 mb-2"
+                placeholder="Task title"
+              />
+              <input
+                type="text"
+                value={editedDescription}
+                onChange={(e) => setEditedDescription(e.target.value)}
+                className="w-full bg-background/50 rounded px-2 py-1"
+                placeholder="Task description"
+              />
+            </div>
+          ) : (
+            <div className="flex-1">
+              <div className="flex items-center gap-2">
+                <h3 className={`font-semibold transition-all duration-300 ${
+                  task.completed ? 'line-through text-gray-400' : ''
+                }`}>
+                  {task.title}
+                </h3>
+                {task.priority && (
+                  <span className={`text-xs ${priorityColors[task.priority]}`}>
+                    {task.priority.toUpperCase()}
+                  </span>
+                )}
+              </div>
+              {task.description && (
+                <p className="text-sm text-gray-400">{task.description}</p>
+              )}
+              {task.tags && (
+                <div className="flex gap-2 mt-2">
+                  {task.tags.map(tag => (
+                    <span key={tag} className="text-xs px-2 py-1 rounded-full bg-accent/10 text-accent">
+                      {tag}
+                    </span>
+                  ))}
+                </div>
               )}
             </div>
-            {task.description && (
-              <p className="text-sm text-gray-400">{task.description}</p>
-            )}
-            {task.tags && (
-              <div className="flex gap-2 mt-2">
-                {task.tags.map(tag => (
-                  <span key={tag} className="text-xs px-2 py-1 rounded-full bg-accent/10 text-accent">
-                    {tag}
-                  </span>
-                ))}
-              </div>
-            )}
-          </div>
+          )}
         </div>
-        <div className="flex flex-col items-end gap-2">
+
+        <div className="flex items-center gap-2">
+          {isEditing ? (
+            <>
+              <button
+                onClick={handleSave}
+                className="p-1 hover:bg-accent/20 rounded"
+              >
+                <Check size={16} className="text-green-400" />
+              </button>
+              <button
+                onClick={() => setIsEditing(false)}
+                className="p-1 hover:bg-accent/20 rounded"
+              >
+                <X size={16} className="text-red-400" />
+              </button>
+            </>
+          ) : (
+            <>
+              <button
+                onClick={() => setIsEditing(true)}
+                className="p-1 hover:bg-accent/20 rounded"
+              >
+                <Edit2 size={16} className="text-accent" />
+              </button>
+              <button
+                onClick={handleDelete}
+                className="p-1 hover:bg-accent/20 rounded"
+              >
+                <Trash2 size={16} className="text-red-400" />
+              </button>
+            </>
+          )}
+        </div>
+
+        <div className="flex flex-col items-end gap-2 ml-4">
           {task.duration && (
             <span className="flex items-center gap-1 text-sm text-gray-400">
               <Clock size={14} />
