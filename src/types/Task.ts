@@ -11,4 +11,5 @@ export interface Task {
   duration?: number;
   priority?: 'low' | 'medium' | 'high';
   tags?: string[];
+  dueTime?: string;
 }

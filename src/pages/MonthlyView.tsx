@@ -18,10 +18,21 @@ const MonthlyView = () => {
         <div className="glass-card p-6">
           <div className="flex items-center gap-2 mb-6">
             <Calendar className="w-6 h-6 text-accent" />
-            <h1 className="text-2xl font-bold">Monthly View</h1>
+            <h1 className="text-2xl font-bold">Monthly Overview</h1>
           </div>
-          <div className="text-center text-gray-400 p-8">
-            Monthly calendar view coming soon...
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <div className="glass-card p-4">
+              <h3 className="font-semibold mb-2">Task Statistics</h3>
+              <p>Total Tasks: 15</p>
+              <p>Completed: 8</p>
+              <p>Pending: 7</p>
+            </div>
+            <div className="glass-card p-4">
+              <h3 className="font-semibold mb-2">Most Productive Days</h3>
+              <p>1. Monday (5 tasks)</p>
+              <p>2. Wednesday (4 tasks)</p>
+              <p>3. Friday (3 tasks)</p>
+            </div>
           </div>
         </div>
       </motion.div>

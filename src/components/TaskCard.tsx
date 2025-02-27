@@ -1,8 +1,8 @@
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { format } from 'date-fns';
 import { Task } from '../types/Task';
-import { Check, Clock, AlertTriangle, Edit2, Trash2, X } from 'lucide-react';
+import { Check, Clock, AlertTriangle, Edit2, Trash2, X, Download } from 'lucide-react';
 import { motion } from 'framer-motion';
 import { toast } from 'sonner';
 
@@ -17,6 +17,44 @@ const TaskCard: React.FC<TaskCardProps> = ({ task, onToggle, onEdit, onDelete })
   const [isEditing, setIsEditing] = useState(false);
   const [editedTitle, setEditedTitle] = useState(task.title);
   const [editedDescription, setEditedDescription] = useState(task.description || '');
+  const [editedDueTime, setEditedDueTime] = useState(task.dueTime || '');
+
+  useEffect(() => {
+    if (task.dueTime && !task.completed) {
+      const now = new Date();
+      const [hours, minutes] = task.dueTime.split(':');
+      const dueDate = new Date();
+      dueDate.setHours(parseInt(hours), parseInt(minutes));
+
+      if (now < dueDate) {
+        const timeoutId = setTimeout(() => {
+          if (!task.completed) {
+            toast.error(`Task "${task.title}" is due now!`, {
+              duration: 5000,
+            });
+            // Request notification permission and show notification
+            if (Notification.permission === "granted") {
+              new Notification(`Task Due: ${task.title}`, {
+                body: "This task is due now!",
+                icon: "/favicon.ico"
+              });
+            } else if (Notification.permission !== "denied") {
+              Notification.requestPermission().then(permission => {
+                if (permission === "granted") {
+                  new Notification(`Task Due: ${task.title}`, {
+                    body: "This task is due now!",
+                    icon: "/favicon.ico"
+                  });
+                }
+              });
+            }
+          }
+        }, dueDate.getTime() - now.getTime());
+
+        return () => clearTimeout(timeoutId);
+      }
+    }
+  }, [task.dueTime, task.completed, task.title]);
 
   const priorityColors = {
     high: 'text-red-400',
@@ -28,6 +66,7 @@ const TaskCard: React.FC<TaskCardProps> = ({ task, onToggle, onEdit, onDelete })
     onEdit(task.id, {
       title: editedTitle,
       description: editedDescription,
+      dueTime: editedDueTime,
     });
     setIsEditing(false);
     toast.success('Task updated successfully!');
@@ -36,6 +75,28 @@ const TaskCard: React.FC<TaskCardProps> = ({ task, onToggle, onEdit, onDelete })
   const handleDelete = () => {
     onDelete(task.id);
     toast.success('Task deleted successfully!');
+  };
+
+  const handleDownload = () => {
+    const taskData = {
+      title: task.title,
+      description: task.description,
+      dueTime: task.dueTime,
+      priority: task.priority,
+      tags: task.tags,
+      completed: task.completed,
+    };
+
+    const blob = new Blob([JSON.stringify(taskData, null, 2)], { type: 'application/json' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `task-${task.title.toLowerCase().replace(/\s+/g, '-')}.json`;
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    URL.revokeObjectURL(url);
+    toast.success('Task downloaded successfully!');
   };
 
   return (
@@ -79,12 +140,12 @@ const TaskCard: React.FC<TaskCardProps> = ({ task, onToggle, onEdit, onDelete })
           </motion.button>
           
           {isEditing ? (
-            <div className="flex-1">
+            <div className="flex-1 space-y-2">
               <input
                 type="text"
                 value={editedTitle}
                 onChange={(e) => setEditedTitle(e.target.value)}
-                className="w-full bg-background/50 rounded px-2 py-1 mb-2"
+                className="w-full bg-background/50 rounded px-2 py-1"
                 placeholder="Task title"
               />
               <input
@@ -93,6 +154,12 @@ const TaskCard: React.FC<TaskCardProps> = ({ task, onToggle, onEdit, onDelete })
                 onChange={(e) => setEditedDescription(e.target.value)}
                 className="w-full bg-background/50 rounded px-2 py-1"
                 placeholder="Task description"
+              />
+              <input
+                type="time"
+                value={editedDueTime}
+                onChange={(e) => setEditedDueTime(e.target.value)}
+                className="w-full bg-background/50 rounded px-2 py-1"
               />
             </div>
           ) : (
@@ -111,6 +178,11 @@ const TaskCard: React.FC<TaskCardProps> = ({ task, onToggle, onEdit, onDelete })
               </div>
               {task.description && (
                 <p className="text-sm text-gray-400">{task.description}</p>
+              )}
+              {task.dueTime && (
+                <p className="text-sm text-accent mt-1">
+                  Due at: {task.dueTime}
+                </p>
               )}
               {task.tags && (
                 <div className="flex gap-2 mt-2">
@@ -146,12 +218,21 @@ const TaskCard: React.FC<TaskCardProps> = ({ task, onToggle, onEdit, onDelete })
               <button
                 onClick={() => setIsEditing(true)}
                 className="p-1 hover:bg-accent/20 rounded"
+                title="Edit task"
               >
                 <Edit2 size={16} className="text-accent" />
               </button>
               <button
+                onClick={handleDownload}
+                className="p-1 hover:bg-accent/20 rounded"
+                title="Download task"
+              >
+                <Download size={16} className="text-accent" />
+              </button>
+              <button
                 onClick={handleDelete}
                 className="p-1 hover:bg-accent/20 rounded"
+                title="Delete task"
               >
                 <Trash2 size={16} className="text-red-400" />
               </button>
